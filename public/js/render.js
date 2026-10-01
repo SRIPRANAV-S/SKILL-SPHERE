@@ -7,7 +7,12 @@ function renderOnboarding(){
   <div class="onboard-wrap">
     <div class="onboard-hero">
       <div class="blob teal"></div><div class="blob amber"></div>
-      <div class="hero-mark"><span class="logomark">${ICONS.logomark}</span>SkillSphere</div>
+      <div class="hero-mark">
+        <div style="display:flex;align-items:center;gap:10px;"><span class="logomark">${ICONS.logomark}</span>SkillSphere</div>
+        <button class="btn small secondary pwa-install-trigger" style="margin-left:auto;padding:6px 12px;" onclick="window.PWA.promptInstall()">
+          <span class="icn">${ICONS.install}</span><span style="margin-left:4px;">Install</span>
+        </button>
+      </div>
       <div class="hero-copy">
         <h1>Trade what you know<br>for what you want<br>to learn.</h1>
         <div class="sub">No course fees, no gatekeeping — just people teaching each other. AI matches you with the right partner in seconds.</div>
@@ -75,25 +80,127 @@ const NAV = [
   ['requests','requests','Requests'],['sessions','sessions','Sessions'],['chat','chat','Chat'],
   ['progress','progress','Progress'],['community','community','Community'],['ai','ai','AI Assistant'],
 ];
+
+let moreDrawerOpen = false;
+function toggleMoreDrawer(open){
+  moreDrawerOpen = typeof open === 'boolean' ? open : !moreDrawerOpen;
+  const drawer = document.getElementById('mobile-more-drawer');
+  if(drawer){
+    if(moreDrawerOpen) drawer.classList.add('open');
+    else drawer.classList.remove('open');
+  }
+}
+
 function renderApp(){
+  const pendingRequests = (state.requests?.incoming || []).filter(r=>r.status==='pending').length;
   app.innerHTML = `
     <div class="sidebar">
       <div class="brand"><span class="logomark">${ICONS.logomark}</span>SkillSphere</div>
-      ${NAV.map(([id,icon,label])=>`<button class="navitem ${state.view===id?'active':''}" onclick="setView('${id}')"><span class="icn">${ICONS[icon]}</span>${label}</button>`).join('')}
+      <div class="sidebar-nav">
+        ${NAV.map(([id,icon,label])=>`
+          <button class="navitem ${state.view===id?'active':''}" onclick="setView('${id}')">
+            <span class="icn">${ICONS[icon]}</span>
+            <span class="nav-label">${label}</span>
+            ${id==='requests' && pendingRequests>0 ? `<span class="nav-badge">${pendingRequests}</span>` : ''}
+          </button>
+        `).join('')}
+      </div>
+      <div class="sidebar-footer">
+        <button class="btn small block pwa-install-trigger" onclick="window.PWA.promptInstall()">
+          <span class="icn">${ICONS.install}</span> Install App
+        </button>
+      </div>
     </div>
     <main id="main"></main>
+
+    <!-- Mobile Bottom Navigation Bar (Phone PWA UX) -->
+    <nav class="mobile-bottom-nav">
+      <button class="mobile-nav-item ${state.view==='home'?'active':''}" onclick="setView('home')">
+        <span class="icn">${ICONS.home}</span>
+        <span>Home</span>
+      </button>
+      <button class="mobile-nav-item ${state.view==='matches'?'active':''}" onclick="setView('matches')">
+        <span class="icn">${ICONS.matches}</span>
+        <span>Matches</span>
+      </button>
+      <button class="mobile-nav-item ${state.view==='chat'?'active':''}" onclick="setView('chat')">
+        <span class="icn">${ICONS.chat}</span>
+        <span>Chat</span>
+      </button>
+      <button class="mobile-nav-item ${state.view==='ai'?'active':''}" onclick="setView('ai')">
+        <span class="icn">${ICONS.ai}</span>
+        <span>AI</span>
+      </button>
+      <button class="mobile-nav-item ${['marketplace','requests','sessions','progress','community'].includes(state.view)?'active':''}" onclick="toggleMoreDrawer(true)">
+        <span class="icn">${ICONS.more}</span>
+        <span>More</span>
+        ${pendingRequests > 0 ? `<span class="mobile-nav-badge"></span>` : ''}
+      </button>
+    </nav>
+
+    <!-- Mobile Bottom Drawer for Other Features -->
+    <div id="mobile-more-drawer" class="mobile-drawer-backdrop" onclick="if(event.target===this) toggleMoreDrawer(false)">
+      <div class="mobile-drawer-sheet">
+        <div class="mobile-drawer-handle"></div>
+        <div class="mobile-drawer-header">
+          <div class="brand"><span class="logomark">${ICONS.logomark}</span>SkillSphere</div>
+          <button class="pwa-modal-close" onclick="toggleMoreDrawer(false)">×</button>
+        </div>
+        <div class="mobile-drawer-grid">
+          <button class="drawer-item ${state.view==='marketplace'?'active':''}" onclick="setView('marketplace'); toggleMoreDrawer(false);">
+            <span class="icn">${ICONS.marketplace}</span><span>Marketplace</span>
+          </button>
+          <button class="drawer-item ${state.view==='requests'?'active':''}" onclick="setView('requests'); toggleMoreDrawer(false);">
+            <span class="icn">${ICONS.requests}</span><span>Requests</span>
+            ${pendingRequests > 0 ? `<span class="drawer-badge">${pendingRequests}</span>` : ''}
+          </button>
+          <button class="drawer-item ${state.view==='sessions'?'active':''}" onclick="setView('sessions'); toggleMoreDrawer(false);">
+            <span class="icn">${ICONS.sessions}</span><span>Sessions</span>
+          </button>
+          <button class="drawer-item ${state.view==='progress'?'active':''}" onclick="setView('progress'); toggleMoreDrawer(false);">
+            <span class="icn">${ICONS.progress}</span><span>Progress</span>
+          </button>
+          <button class="drawer-item ${state.view==='community'?'active':''}" onclick="setView('community'); toggleMoreDrawer(false);">
+            <span class="icn">${ICONS.community}</span><span>Community</span>
+          </button>
+        </div>
+        <div class="mobile-drawer-actions">
+          <button class="btn block pwa-install-trigger" onclick="window.PWA.promptInstall(); toggleMoreDrawer(false);">
+            <span class="icn">${ICONS.install}</span> Install SkillSphere App
+          </button>
+        </div>
+      </div>
+    </div>
   `;
   renderView();
 }
-function setView(v){ state.view=v; renderView(); }
+function setView(v){ state.view=v; renderApp(); }
 function renderView(){
   const main = document.getElementById('main');
+  if(!main) return;
   const titles = {home:'Home',matches:'AI Matches',marketplace:'Skill Marketplace',requests:'Requests',sessions:'Sessions',chat:'Chat',progress:'Your Progress',community:'Community Groups',ai:'AI Learning Assistant'};
-  main.innerHTML = `<div class="topbar"><h2>${titles[state.view]}</h2><div class="avatar">${state.profile.avatar}</div></div><div id="viewbody"></div>`;
+  main.innerHTML = `
+    <div class="topbar">
+      <div class="topbar-left">
+        <h2>${titles[state.view] || 'SkillSphere'}</h2>
+        <span class="offline-pill" title="Network disconnected"><span class="icn">${ICONS.offline}</span> Offline</span>
+      </div>
+      <div class="topbar-right">
+        <button class="btn small secondary pwa-install-trigger" onclick="window.PWA.promptInstall()" title="Install app to your home screen">
+          <span class="icn">${ICONS.install}</span><span class="install-btn-text">Install App</span>
+        </button>
+        <div class="avatar" title="${state.profile?.name || 'User'}">${state.profile?.avatar || '👤'}</div>
+      </div>
+    </div>
+    <div id="viewbody"></div>
+  `;
   const body = document.getElementById('viewbody');
   const renderers = {home:renderHome,matches:renderMatches,marketplace:renderMarketplace,requests:renderRequests,sessions:renderSessions,chat:renderChat,progress:renderProgress,community:renderCommunity,ai:renderAI};
-  renderers[state.view](body);
+  if(renderers[state.view]) renderers[state.view](body);
   requestAnimationFrame(()=>{ document.querySelectorAll('.barfill[data-w]').forEach(el=>{ el.style.width = el.dataset.w+'%'; }); });
+  if (window.PWA && window.PWA.updateInstallButtonVisibility) {
+    window.PWA.updateInstallButtonVisibility();
+  }
 }
 
 /* ---------- HOME ---------- */

@@ -9,18 +9,43 @@ a live AI learning assistant.
 ```
 skillsphere-project/
 ├── package.json
-├── server.js            Express server: serves the frontend + proxies AI calls
-├── .env.example          Copy to .env and add your Anthropic API key
+├── server.js            Express server: serves the frontend, PWA headers + proxies AI calls
+├── .env.example          Copy to .env and add your Gemini / Anthropic API key
+├── scripts/
+│   └── generate-icons.js High-resolution PWA & maskable icon generator
 └── public/
-    ├── index.html
-    ├── css/style.css
+    ├── index.html        PWA-ready HTML with manifest, iOS & touch meta tags
+    ├── manifest.json     Web App Manifest (standalone, theme colors, icons, shortcuts)
+    ├── sw.js             Service Worker (offline caching, app shell & dynamic fallback)
+    ├── icons/            PWA app icons (192x192, 512x512, maskable, iOS touch icon)
+    ├── css/style.css     Responsive styles, mobile bottom navigation, PWA sheets & modals
     └── js/
-        ├── icons.js       Inline SVG icon set
+        ├── icons.js       Inline SVG icon set (including PWA & mobile icons)
+        ├── pwa.js         PWA install triggers, iOS modal guide & online/offline sync
         ├── data.js        Mock user data, categories, badge definitions
         ├── state.js       App state, localStorage persistence, matching algorithm
-        ├── render.js       All screen rendering + interaction handlers
+        ├── render.js      All screen rendering, mobile bottom bar & interaction handlers
         └── app.js         Entry point (boots the app)
 ```
+
+## Progressive Web App (PWA) & Mobile Installation
+
+SkillSphere is a fully compliant Progressive Web App (PWA) designed to be installed on mobile devices (Android & iOS) and desktop:
+
+### 📱 Installing on Android / Chrome:
+1. Open SkillSphere in Chrome on your phone.
+2. Tap the **"Install App"** button in the header / navigation drawer, or tap the browser menu (**⋮**) -> **"Install app"** / **"Add to Home screen"**.
+3. SkillSphere will install as a standalone native-feeling application with its own home screen icon and offline support.
+
+### 🍏 Installing on iOS (iPhone / iPad):
+1. Open SkillSphere in **Safari**.
+2. Tap the **Share** button (**⎋**) in the bottom toolbar.
+3. Scroll and select **"Add to Home Screen"** (**⊞**).
+4. Tap **Add** in the top-right corner to launch SkillSphere in full-screen standalone mode.
+
+### ⚡ Offline Support:
+- Core application shell, styles, icons, and fonts are cached automatically via `sw.js`.
+- If your device loses internet connectivity, existing matches, scheduled sessions, chats, and progress remain accessible. Real-time connectivity status is indicated with the offline badge.
 
 ## Running it in Antigravity (or any IDE)
 

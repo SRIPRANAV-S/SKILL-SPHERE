@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#0F1117"/>
+  <defs>
+    <filter id="glowTeal" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="24" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <filter id="glowAmber" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="24" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <linearGradient id="tealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#72f1df"/>
+      <stop offset="100%" stop-color="#38b7a6"/>
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffd572"/>
+      <stop offset="100%" stop-color="#e29b28"/>
+    </linearGradient>
+  </defs>
+  <!-- Background Glows -->
+  <circle cx="210" cy="256" r="140" fill="#4FD8C4" opacity="0.2" filter="url(#glowTeal)"/>
+  <circle cx="302" cy="256" r="140" fill="#F2B84B" opacity="0.2" filter="url(#glowAmber)"/>
+  <!-- Primary Overlapping Spheres -->
+  <circle cx="210" cy="256" r="115" fill="url(#tealGrad)" opacity="0.94"/>
+  <circle cx="302" cy="256" r="115" fill="url(#amberGrad)" opacity="0.86"/>
+</svg>
